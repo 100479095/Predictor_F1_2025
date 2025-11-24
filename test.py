@@ -1,0 +1,1 @@
+print("Este script ha sido deshabilitado temporalmente.")
