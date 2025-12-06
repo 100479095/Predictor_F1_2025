@@ -59,7 +59,7 @@ def get_weather_data(latitude, longitude, date):
             "start_date": date,
             "end_date": date,
             "hourly": ["wind_speed_100m", "temperature_2m", "relative_humidity_2m", 
-                      "precipitation", "rain", "pressure_msl", "surface_pressure"],
+                      "precipitation", "pressure_msl", "surface_pressure"],
         }
         
         responses = openmeteo.weather_api(url, params=params)
@@ -71,9 +71,8 @@ def get_weather_data(latitude, longitude, date):
         hourly_temperature_2m = hourly.Variables(1).ValuesAsNumpy()
         hourly_relative_humidity_2m = hourly.Variables(2).ValuesAsNumpy()
         hourly_precipitation = hourly.Variables(3).ValuesAsNumpy()
-        hourly_rain = hourly.Variables(4).ValuesAsNumpy()
-        hourly_pressure_msl = hourly.Variables(5).ValuesAsNumpy()
-        hourly_surface_pressure = hourly.Variables(6).ValuesAsNumpy()
+        hourly_pressure_msl = hourly.Variables(4).ValuesAsNumpy()
+        hourly_surface_pressure = hourly.Variables(5).ValuesAsNumpy()
         
         # Calcular promedios diarios
         weather_summary = {
@@ -84,7 +83,6 @@ def get_weather_data(latitude, longitude, date):
             'min_temperature_2m': float(hourly_temperature_2m.min()) if len(hourly_temperature_2m) > 0 else None,
             'avg_humidity': float(hourly_relative_humidity_2m.mean()) if len(hourly_relative_humidity_2m) > 0 else None,
             'total_precipitation': float(hourly_precipitation.sum()) if len(hourly_precipitation) > 0 else None,
-            'total_rain': float(hourly_rain.sum()) if len(hourly_rain) > 0 else None,
             'avg_pressure_msl': float(hourly_pressure_msl.mean()) if len(hourly_pressure_msl) > 0 else None,
             'avg_surface_pressure': float(hourly_surface_pressure.mean()) if len(hourly_surface_pressure) > 0 else None,
         }
