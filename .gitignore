@@ -1,1 +1,5 @@
 venv
+f1_data
+.cache.sqlite
+f1_weather_data.json
+f1_weather_data.csv
