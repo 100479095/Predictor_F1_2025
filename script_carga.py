@@ -22,6 +22,8 @@ def generar_dataset_f1_completo(min_year=2016):
     # Columnas finales requeridas
     COLUMNAS_FINALES = [
         'RACEID', 'DRIVERID', 'CONSTRUCTORID', 'CIRCUITID', 'ROUND', 'YEAR', 'LAP DISTANCE KM', 'LAPS RACE', 
+        'AVG WIND SPEED', 'MAX WIND SPEED', 'AVG TEMPERATURE', 'MIN TEMPERATURE', 'MAX TEMPERATURE',
+        'AVG HUMIDITY', 'PRECIPITATION', 'AVG PRESSURE MSL', 'AVG SURFACE PRESSURE',
         'DRIVER LAST POSITION', 'WINS SEASON', 'WINS CAREER', 'POINTS BEFORE GP', 'YEARS OF EXPERIENCE', 'AGE', 
         'MATE LAST POSITION',
         'CONSTRUCTOR POINTS BEFORE GP', 'CONSTRUCTOR WINS SEASON',
@@ -68,6 +70,35 @@ def generar_dataset_f1_completo(min_year=2016):
     circuits_df = pd.read_csv('circuits.csv', sep=COMMON_DELIMITER)
     circuits_df = circuits_df[['circuitId', 'lap_distance_km']].copy()
     circuits_df.rename(columns={'circuitId': 'CIRCUITID', 'lap_distance_km': 'LAP DISTANCE KM'}, inplace=True)
+    
+    # h) f1_weather_data.csv (añadir datos meteorológicos)
+    weather_df = pd.read_csv('f1_weather_data.csv', sep=COMMON_DELIMITER)
+    weather_df = weather_df[[
+        'raceId', 'avg_wind_speed_100m', 'max_wind_speed_100m', 'avg_temperature_2m', 
+        'min_temperature_2m', 'max_temperature_2m', 'avg_humidity', 'total_precipitation',
+        'avg_pressure_msl', 'avg_surface_pressure'
+    ]].copy()
+    # Redondear a 2 decimales
+    weather_df['avg_wind_speed_100m'] = weather_df['avg_wind_speed_100m'].round(2)
+    weather_df['max_wind_speed_100m'] = weather_df['max_wind_speed_100m'].round(2)
+    weather_df['avg_temperature_2m'] = weather_df['avg_temperature_2m'].round(2)
+    weather_df['min_temperature_2m'] = weather_df['min_temperature_2m'].round(2)
+    weather_df['max_temperature_2m'] = weather_df['max_temperature_2m'].round(2)
+    weather_df['avg_humidity'] = weather_df['avg_humidity'].round(2)
+    weather_df['total_precipitation'] = weather_df['total_precipitation'].round(2)
+    weather_df['avg_pressure_msl'] = weather_df['avg_pressure_msl'].round(2)
+    weather_df['avg_surface_pressure'] = weather_df['avg_surface_pressure'].round(2)
+    weather_df.rename(columns={
+        'avg_wind_speed_100m': 'AVG WIND SPEED',
+        'max_wind_speed_100m': 'MAX WIND SPEED',
+        'avg_temperature_2m': 'AVG TEMPERATURE',
+        'min_temperature_2m': 'MIN TEMPERATURE',
+        'max_temperature_2m': 'MAX TEMPERATURE',
+        'avg_humidity': 'AVG HUMIDITY',
+        'total_precipitation': 'PRECIPITATION',
+        'avg_pressure_msl': 'AVG PRESSURE MSL',
+        'avg_surface_pressure': 'AVG SURFACE PRESSURE'
+    }, inplace=True)
     
     # e) drivers.csv (Información de pilotos)
     drivers_df = pd.read_csv('drivers.csv', sep=COMMON_DELIMITER)
@@ -118,6 +149,14 @@ def generar_dataset_f1_completo(min_year=2016):
         merged_df,
         circuits_df,
         on='CIRCUITID',
+        how='left'
+    )
+    
+    # Fusión 6: con Datos Meteorológicos (Left Join)
+    merged_df = pd.merge(
+        merged_df,
+        weather_df,
+        on='raceId',
         how='left'
     )
     
@@ -403,4 +442,4 @@ def generar_dataset_f1_completo(min_year=2016):
 
 
 # Ejecutar la función principal para generar el dataset
-generar_dataset_f1_completo(min_year=2025)
+generar_dataset_f1_completo(min_year=2016)
