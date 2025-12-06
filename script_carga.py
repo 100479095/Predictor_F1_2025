@@ -409,6 +409,9 @@ def generar_dataset_f1_completo(min_year=2016):
     # Limpiar valores NaN en columnas numéricas
     final_df['DRIVER LAST POSITION'] = final_df['DRIVER LAST POSITION'].fillna(21).astype(int)
     final_df['POINTS BEFORE GP'] = final_df['POINTS BEFORE GP'].fillna(0)
+    
+    # Sustituir GRID = 0 por 20 (pilotos que salen desde el fondo)
+    final_df['GRID'] = final_df['GRID'].replace(0, 20)
 
 
     # --- 7. Guardar el Resultado Final ---
