@@ -290,7 +290,7 @@ def generar_dataset_f1_completo(min_year=2016):
     # DRIVER LAST POSITION: Posición del piloto en la carrera anterior (no en el campeonato)
     # Convertir position a numérico si no lo es
     merged_df['position'] = pd.to_numeric(merged_df['position'], errors='coerce')
-    merged_df['DRIVER LAST POSITION'] = merged_df.groupby('DRIVERID')['position'].shift(1).fillna(0).astype(int)
+    merged_df['DRIVER LAST POSITION'] = merged_df.groupby('DRIVERID')['position'].shift(1).fillna(21).astype(int)
     
     # POINTS BEFORE GP: Puntos en el campeonato antes de esta carrera
     merged_df['POINTS BEFORE GP'] = merged_df.groupby('DRIVERID')['POINTS STANDINGS'].shift(1).fillna(0)
@@ -368,54 +368,32 @@ def generar_dataset_f1_completo(min_year=2016):
         axis=1
     ).fillna(0).astype(int)
     
-    # MATE LAST POSITION: Posición del compañero de equipo en la carrera anterior
-    # Primero, crear un dataframe auxiliar con todos los pilotos por carrera
-    # Ordenar por RACEID y DRIVERID para procesamiento secuencial
+    # MATE LAST POSITION: Posición del compañero de equipo en su última carrera
+    # Usar el DRIVER LAST POSITION del compañero actual
     merged_df = merged_df.sort_values(['RACEID', 'DRIVERID']).reset_index(drop=True)
-    
-    # Convertir position a numérico
-    merged_df['position'] = pd.to_numeric(merged_df['position'], errors='coerce')
     
     # Crear una lista para almacenar las posiciones del compañero
     mate_positions = []
     
-    # Para cada fila, buscar al compañero de equipo en la carrera anterior
+    # Para cada fila, buscar al compañero de equipo actual y obtener su DRIVER LAST POSITION
     for idx, row in merged_df.iterrows():
         driver_id = row['DRIVERID']
         current_race_id = row['RACEID']
         constructor_id = row['CONSTRUCTORID']
         
-        # Buscar la carrera anterior de este piloto
-        prev_races = merged_df[
-            (merged_df['DRIVERID'] == driver_id) & 
-            (merged_df['RACEID'] < current_race_id)
-        ]
-        
-        if prev_races.empty:
-            mate_positions.append(None)
-            continue
-        
-        # Obtener la última carrera anterior
-        prev_race_id = prev_races['RACEID'].max()
-        
-        # Buscar el constructor en esa carrera anterior
-        prev_constructor = merged_df[
-            (merged_df['DRIVERID'] == driver_id) & 
-            (merged_df['RACEID'] == prev_race_id)
-        ]['CONSTRUCTORID'].iloc[0]
-        
-        # Buscar al compañero de equipo en esa misma carrera anterior
+        # Buscar al compañero de equipo en la misma carrera actual
         mate = merged_df[
-            (merged_df['RACEID'] == prev_race_id) &
-            (merged_df['CONSTRUCTORID'] == prev_constructor) &
+            (merged_df['RACEID'] == current_race_id) &
+            (merged_df['CONSTRUCTORID'] == constructor_id) &
             (merged_df['DRIVERID'] != driver_id)
         ]
         
         if mate.empty:
-            mate_positions.append(None)
+            mate_positions.append(21)
         else:
-            mate_pos = mate['position'].iloc[0]
-            mate_positions.append(int(mate_pos) if pd.notna(mate_pos) else None)
+            # Obtener el DRIVER LAST POSITION del compañero (su posición en la carrera anterior)
+            mate_last_pos = mate['DRIVER LAST POSITION'].iloc[0]
+            mate_positions.append(int(mate_last_pos) if pd.notna(mate_last_pos) else 21)
     
     merged_df['MATE LAST POSITION'] = mate_positions
     
@@ -429,7 +407,7 @@ def generar_dataset_f1_completo(min_year=2016):
     final_df = final_df[COLUMNAS_FINALES]
     
     # Limpiar valores NaN en columnas numéricas
-    final_df['DRIVER LAST POSITION'] = final_df['DRIVER LAST POSITION'].fillna(0).astype(int)
+    final_df['DRIVER LAST POSITION'] = final_df['DRIVER LAST POSITION'].fillna(21).astype(int)
     final_df['POINTS BEFORE GP'] = final_df['POINTS BEFORE GP'].fillna(0)
 
 
