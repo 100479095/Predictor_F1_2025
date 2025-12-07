@@ -21,7 +21,7 @@ def generar_dataset_f1_completo(min_year=2016):
 
     # Columnas finales requeridas
     COLUMNAS_FINALES = [
-        'RACEID', 'DRIVERID', 'CONSTRUCTORID', 'CIRCUITID', 'ROUND', 'YEAR', 'LAP DISTANCE KM', 'LAPS RACE', 
+        'RACEID', 'DRIVERID', 'CONSTRUCTORID', 'CIRCUITID', 'ROUND', 'YEAR', 'LAP DISTANCE KM', 'LAPS RACE', 'URBAN',
         'AVG WIND SPEED', 'MAX WIND SPEED', 'AVG TEMPERATURE', 'MIN TEMPERATURE', 'MAX TEMPERATURE',
         'AVG HUMIDITY', 'PRECIPITATION', 'AVG PRESSURE MSL', 'AVG SURFACE PRESSURE',
         'DRIVER LAST POSITION', 'WINS SEASON', 'WINS CAREER', 'POINTS BEFORE GP', 'YEARS OF EXPERIENCE', 'AGE', 
@@ -66,10 +66,10 @@ def generar_dataset_f1_completo(min_year=2016):
     races_df = races_df[races_df['YEAR'] >= PROCESS_FROM_YEAR].copy()
     recent_race_ids = set(races_df['raceId'].unique())
 
-    # g) circuits.csv (añadir distancia por vuelta)
+    # g) circuits.csv (añadir distancia por vuelta y si es urbano)
     circuits_df = pd.read_csv('circuits.csv', sep=COMMON_DELIMITER)
-    circuits_df = circuits_df[['circuitId', 'lap_distance_km']].copy()
-    circuits_df.rename(columns={'circuitId': 'CIRCUITID', 'lap_distance_km': 'LAP DISTANCE KM'}, inplace=True)
+    circuits_df = circuits_df[['circuitId', 'lap_distance_km', 'urban']].copy()
+    circuits_df.rename(columns={'circuitId': 'CIRCUITID', 'lap_distance_km': 'LAP DISTANCE KM', 'urban': 'URBAN'}, inplace=True)
     
     # h) f1_weather_data.csv (añadir datos meteorológicos)
     weather_df = pd.read_csv('f1_weather_data.csv', sep=COMMON_DELIMITER)
