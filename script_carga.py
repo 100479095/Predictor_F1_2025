@@ -28,6 +28,7 @@ def generar_dataset_f1_completo(min_year=2016):
         'MATE LAST POSITION',
         'CONSTRUCTOR POINTS BEFORE GP', 'CONSTRUCTOR WINS SEASON',
         'Q1', 'Q2', 'Q3', 'BEST Q', 'GRID',
+        'Q1 VALID', 'Q2 VALID', 'Q3 VALID', 'RACE VALID',
         'SPRINT Y/N', 'MS RACE'
     ]
 
@@ -269,6 +270,16 @@ def generar_dataset_f1_completo(min_year=2016):
     # Rellenar valores NA restantes en MS RACE con valor arbitrariamente alto
     merged_df['MS RACE'] = merged_df['MS RACE'].fillna(10000000)
     
+    # Crear columnas binarias para indicar si el piloto tiene tiempo válido
+    # Q1 VALID: 1 si Q1 != 300000, 0 si Q1 == 300000
+    merged_df['Q1 VALID'] = (merged_df['Q1'] != 300000).astype(int)
+    # Q2 VALID: 1 si Q2 != 300000, 0 si Q2 == 300000
+    merged_df['Q2 VALID'] = (merged_df['Q2'] != 300000).astype(int)
+    # Q3 VALID: 1 si Q3 != 300000, 0 si Q3 == 300000
+    merged_df['Q3 VALID'] = (merged_df['Q3'] != 300000).astype(int)
+    # RACE VALID: 1 si MS RACE != 10000000, 0 si MS RACE == 10000000
+    merged_df['RACE VALID'] = (merged_df['MS RACE'] != 10000000).astype(int)
+    
     # Eliminar columna auxiliar
     merged_df.drop(columns=['WINNER_TIME'], inplace=True)
     
@@ -402,6 +413,9 @@ def generar_dataset_f1_completo(min_year=2016):
     
     # Aplicar el filtro: solo años >= min_year
     final_df = merged_df[merged_df['YEAR'] >= min_year].copy()
+    
+    # Transformar la columna YEAR: restar 2025 para que 2025 sea 0 y años anteriores sean negativos
+    final_df['YEAR'] = final_df['YEAR'] - 2025
     
     # Seleccionar y reordenar las columnas finales
     final_df = final_df[COLUMNAS_FINALES]
