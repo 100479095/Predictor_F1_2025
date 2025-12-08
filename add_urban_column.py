@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Cargar el CSV
-df = pd.read_csv('circuits.csv')
+df = pd.read_csv('f1_data/circuits.csv')
 
 # Circuitos urbanos (basados en street circuits conocidos)
 urban_circuits = {

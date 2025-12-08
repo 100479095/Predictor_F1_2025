@@ -1,6 +1,6 @@
 import pandas as pd
 
-def generar_dataset_f1_completo(min_year=2016):
+def generar_dataset_f1_completo(min_year=2014):
     """
     Carga, fusiona, reorganiza y filtra los datos de F1 a partir de un año específico.
 
@@ -8,10 +8,10 @@ def generar_dataset_f1_completo(min_year=2016):
         min_year (int): El año mínimo (inclusive) para el filtrado de carreras.
     """
     # --- 1. Definición de Archivos y Delimitadores ---
-    RESULTS_FILE = 'results.csv'
-    SPRINT_RESULTS_FILE = 'sprint_results.csv'
-    QUALIFYING_FILE = 'qualifying.csv'
-    RACES_FILE = 'races.csv'
+    RESULTS_FILE = 'f1_data/results.csv'
+    SPRINT_RESULTS_FILE = 'f1_data/sprint_results.csv'
+    QUALIFYING_FILE = 'f1_data/qualifying.csv'
+    RACES_FILE = 'f1_data/races.csv'
 
     COMMON_DELIMITER = ','
     # Año mínimo de datos que se cargan para todos los cálculos (reduce volumen)
@@ -68,7 +68,7 @@ def generar_dataset_f1_completo(min_year=2016):
     recent_race_ids = set(races_df['raceId'].unique())
 
     # g) circuits.csv (añadir distancia por vuelta y si es urbano)
-    circuits_df = pd.read_csv('circuits.csv', sep=COMMON_DELIMITER)
+    circuits_df = pd.read_csv('f1_data/circuits.csv', sep=COMMON_DELIMITER)
     circuits_df = circuits_df[['circuitId', 'lap_distance_km', 'urban']].copy()
     circuits_df.rename(columns={'circuitId': 'CIRCUITID', 'lap_distance_km': 'LAP DISTANCE KM', 'urban': 'URBAN'}, inplace=True)
     
@@ -102,13 +102,13 @@ def generar_dataset_f1_completo(min_year=2016):
     }, inplace=True)
     
     # e) drivers.csv (Información de pilotos)
-    drivers_df = pd.read_csv('drivers.csv', sep=COMMON_DELIMITER)
+    drivers_df = pd.read_csv('f1_data/drivers.csv', sep=COMMON_DELIMITER)
     drivers_df = drivers_df[['driverId', 'dob']].copy()
     drivers_df.rename(columns={'dob': 'DOB'}, inplace=True)
     drivers_df['DOB'] = pd.to_datetime(drivers_df['DOB'])
     
     # f) driver_standings.csv (Campeonato de pilotos)
-    driver_standings_df = pd.read_csv('driver_standings.csv', sep=COMMON_DELIMITER, na_values=['\\N'])
+    driver_standings_df = pd.read_csv('f1_data/driver_standings.csv', sep=COMMON_DELIMITER, na_values=['\\N'])
     driver_standings_df = driver_standings_df[driver_standings_df['raceId'].isin(recent_race_ids)]
     driver_standings_df = driver_standings_df[['raceId', 'driverId', 'points', 'position']].copy()
     driver_standings_df.rename(columns={
@@ -235,7 +235,7 @@ def generar_dataset_f1_completo(min_year=2016):
     merged_df = merged_df.merge(laps_per_race, on='RACEID', how='left')
     
     # Cargar status para identificar pilotos con +N laps
-    status_df = pd.read_csv('status.csv', sep=COMMON_DELIMITER)
+    status_df = pd.read_csv('f1_data/status.csv', sep=COMMON_DELIMITER)
     status_dict = status_df.set_index('statusId')['status'].to_dict()
     
     # Obtener tiempos del ganador por carrera
@@ -341,7 +341,7 @@ def generar_dataset_f1_completo(min_year=2016):
     
     # CONSTRUCTOR POINTS BEFORE GP: Puntos del constructor antes de esta carrera
     # Cargar constructor standings
-    constructor_standings_df = pd.read_csv('constructor_standings.csv', sep=COMMON_DELIMITER, na_values=['\\N'])
+    constructor_standings_df = pd.read_csv('f1_data/constructor_standings.csv', sep=COMMON_DELIMITER, na_values=['\\N'])
     constructor_standings_df = constructor_standings_df[constructor_standings_df['raceId'].isin(recent_race_ids)]
     constructor_standings_df = constructor_standings_df[['raceId', 'constructorId', 'points']].copy()
     constructor_standings_df.rename(columns={'points': 'CONSTRUCTOR POINTS'}, inplace=True)
@@ -437,4 +437,4 @@ def generar_dataset_f1_completo(min_year=2016):
 
 
 # Ejecutar la función principal para generar el dataset
-generar_dataset_f1_completo(min_year=2016)
+generar_dataset_f1_completo(min_year=2014)
